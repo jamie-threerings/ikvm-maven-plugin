@@ -23,69 +23,71 @@ import org.codehaus.plexus.util.cli.Commandline;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
  * Goal which generates an IKVM dll containing all the jars on the classpath.
- *
- * @requiresDependencyResolution compile
- * @goal ikvm
- * @phase package
  */
+@Mojo(name="ikvm", defaultPhase=LifecyclePhase.PACKAGE,
+    requiresDependencyResolution=ResolutionScope.COMPILE)
 public class IkvmMavenMojo extends AbstractMojo
 {
     /**
      * Location of the IKVM installation.
-     * @parameter expression="${ikvm.path}"
      */
+    @Parameter(property="ikvm.path")
     public File ikvmPath;
 
     /**
      * Location of the {@code ikvmc.exe} executable. Default: {@code ${ikvm.path}/bin/ikvmc.exe}.
-     * @parameter expression="${ikvmc.path}"
      */
+    @Parameter(property="ikvmc.path")
     public File ikvmcPath;
 
     /**
      * The location of the standard library DLLs.
-     * @parameter expression="${dll.path}" default-value="/Developer/MonoTouch/usr/lib/mono/2.1"
      */
+    @Parameter(property="dll.path", defaultValue="/Developer/MonoTouch/usr/lib/mono/2.1")
     public File dllPath;
 
     /**
      * Indicates that IKVM should be run via Mono rather than run directly as an executable. The
      * plugin defaults to running IKVM directly if we are running on Windows and using Mono
      * otherwise (on Mac and Linux), but this can force the use of Mono on Windows.
-     * @parameter expression="${force.mono}" default-value="false"
      */
+    @Parameter(property="force.mono", defaultValue="false")
     public boolean forceMono;
 
     /**
      * Additional arguments to pass to IKVM.
-     * @parameter
      */
+    @Parameter
     public List<String> ikvmArgs = new ArrayList<String>();
 
     /**
      * Additional DLLs (beyond mscorlib, System and System.Core) to reference. These can be
      * absolute paths, or relative to {@code dllPath}.
-     * @parameter
      */
+    @Parameter
     public List<String> dlls = new ArrayList<String>();
 
     /**
-     * DLLs to copy into the target directory. These can be absoulte paths, or relative to {@code
+     * DLLs to copy into the target directory. These can be absolute paths, or relative to {@code
      * ikvmPath}.
-     * @parameter
      */
+    @Parameter
     public List<String> copyDlls = new ArrayList<String>();
 
     /**
      * Causes the plugin to copy {@code <type>dll</type>} dependencies into the target directory
      * (minus their version information) so that they can be consistently referenced from your
      * {@code .csproj} file.
-     * @parameter expression="${ikvm.copydlldepends}" default-value="false"
      */
+    @Parameter(property="ikvm.copydlldepends", defaultValue="false")
     public boolean copyDllDepends;
 
     /**
@@ -94,22 +96,22 @@ public class IkvmMavenMojo extends AbstractMojo
      * when built in environments that cannot build the ios component. One can also solve this
      * problem with Maven profiles but it is extremely messy and foists a lot of complexity onto
      * the end user.
-     * @parameter expression="${ikvm.createstub}" default-value="false"
      */
+    @Parameter(property="ikvm.createstub", defaultValue="false")
     public boolean createStub;
 
     /**
      * If true, only includes class files from the dependent jar files, ignoring any XML, image or
      * other files that might also be in the jar. If this is false (the default) all of those
      * resources files are included in the generated DLL.
-     * @parameter expression="${ikvm.onlycode}" default-value="false"
      */
+    @Parameter(property="ikvm.onlycode", defaultValue="false")
     public boolean onlyCode;
 
     /**
      * If true, check the output of ikvmc for "Warning" statements and abort the build.
-     * @parameter expression="${ikvm.treatWarningsAsErrors}" default-value="false"
      */
+    @Parameter(property="ikvm.treatWarningsAsErrors", defaultValue="false")
     public boolean treatWarningsAsErrors;
 
     public void execute () throws MojoExecutionException {
@@ -336,6 +338,6 @@ public class IkvmMavenMojo extends AbstractMojo
             " detected in ikvmc output: " + StringUtils.join(warnings.iterator(), ", ") + ".");
     }
 
-    /** @parameter default-value="${project}" */
+    @Parameter(defaultValue="${project}")
     private MavenProject _project;
 }
