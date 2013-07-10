@@ -91,6 +91,14 @@ public class IkvmMavenMojo extends AbstractMojo
     public boolean copyDllDepends;
 
     /**
+     * Causes the plugin to copy {@code <type>dll</type>} dependencies into the target directory
+     * so that they can be consistently referenced from your {@code .csproj} file. This is
+     * logically exclusive with {@link #copyDllDepends}, but for simplicity supersedes it.
+     */
+    @Parameter(property="ikvm.copydlldependswithversion", defaultValue="false")
+    public boolean copyDllDependsWithVersion;
+
+    /**
      * Creates a zero-sized stub file in the event that {@code ikvm.path} is not set and we cannot
      * build a proper artifact. This allows builds that include an ios submodule to not fail even
      * when built in environments that cannot build the ios component. One can also solve this
@@ -273,14 +281,15 @@ public class IkvmMavenMojo extends AbstractMojo
         }
 
         // if we want our dll depends copied, do that as well
-        if (copyDllDepends) {
+        if (copyDllDepends || copyDllDependsWithVersion) {
             for (Artifact dll : dllDepends) {
+                File dest = new File(projectDir, copyDllDependsWithVersion ?
+                    dll.getFile().getName() : dll.getArtifactId() + "." + dll.getType());
                 try {
-                    String name = dll.getArtifactId() + "." + dll.getType();
-                    FileUtils.copyFile(dll.getFile(), new File(projectDir, name));
+                    FileUtils.copyFile(dll.getFile(), dest);
                 } catch (IOException ioe) {
                     throw new MojoExecutionException(
-                        "Failed to copy " + dll + " into " + projectDir, ioe);
+                        "Failed to copy " + dll + " into " + dest, ioe);
                 }
             }
         }
