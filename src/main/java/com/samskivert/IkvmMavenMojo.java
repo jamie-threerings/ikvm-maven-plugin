@@ -180,7 +180,7 @@ public class IkvmMavenMojo extends AbstractMojo
             cli = new Commandline(ikvmcPath.getAbsolutePath());
         } else {
             cli = new Commandline("mono");
-            cli.createArgument().setValue(ikvmcPath.getAbsolutePath());
+            cli.createArg().setValue(ikvmcPath.getAbsolutePath());
         }
 
         // add our standard args
@@ -188,7 +188,7 @@ public class IkvmMavenMojo extends AbstractMojo
         stdArgs.add("-nostdlib");
         stdArgs.add("-target:library");
         for (String arg : stdArgs) {
-            cli.createArgument().setValue(arg);
+            cli.createArg().setValue(arg);
         }
 
         // add our user defined args (making sure they don't duplicate stdargs)
@@ -199,11 +199,11 @@ public class IkvmMavenMojo extends AbstractMojo
                               "and project.build.finalName in your POM.");
                 continue;
             }
-            cli.createArgument().setValue(arg);
+            cli.createArg().setValue(arg);
         }
 
         // add our output file
-        cli.createArgument().setValue("-out:" + artifactFile.getAbsolutePath());
+        cli.createArg().setValue("-out:" + artifactFile.getAbsolutePath());
 
         // add our standard DLLs
         List<String> stdDlls = new ArrayList<String>();
@@ -211,16 +211,16 @@ public class IkvmMavenMojo extends AbstractMojo
         stdDlls.add("System.dll");
         stdDlls.add("System.Core.dll");
         for (String dll : stdDlls) {
-            cli.createArgument().setValue("-r:" + getDLLPath(dll));
+            cli.createArg().setValue("-r:" + getDLLPath(dll));
         }
 
         // add our DLLs
         for (String dll : dlls) {
             if (stdDlls.contains(dll)) continue;
-            cli.createArgument().setValue("-r:" + getDLLPath(dll));
+            cli.createArg().setValue("-r:" + getDLLPath(dll));
         }
         for (Artifact dll : dllDepends) {
-            cli.createArgument().setValue("-r:" + dll.getFile().getAbsolutePath());
+            cli.createArg().setValue("-r:" + dll.getFile().getAbsolutePath());
         }
 
         // if we're in onlyCode mode, then unpack our jars into a temporary directory and delete
@@ -246,13 +246,13 @@ public class IkvmMavenMojo extends AbstractMojo
                     throw new MojoExecutionException("Error extracting classes from: " + depend, e);
                 }
             }
-            cli.createArgument().setValue("-recurse:" + codeDir.getAbsolutePath() + File.separator +
+            cli.createArg().setValue("-recurse:" + codeDir.getAbsolutePath() + File.separator +
                                           "*.class");
 
         } else {
             // otherwise just add our jar files to the argument list
             for (File depend : javaDepends) {
-                cli.createArgument().setValue(depend.getAbsolutePath());
+                cli.createArg().setValue(depend.getAbsolutePath());
             }
         }
 
